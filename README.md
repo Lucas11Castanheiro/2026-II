@@ -1,8 +1,8 @@
-📚 Biblioteca ORM em PHP
+**Biblioteca ORM em PHP**
 
 Sistema desenvolvido em PHP orientado a objetos que implementa o padrão de projeto Repository (Mapeamento Objeto-Relacional / ORM simplificado) para o gerenciamento de Autores e Livros, garantindo a separação de responsabilidades entre a regra de negócio e a camada de persistência de dados.
 
-🏗️ Arquitetura do Projeto
+***Arquitetura do Projeto***
 
 O projeto está organizado seguindo boas práticas de engenharia de software (Domain-Driven Design simplificado):
 
@@ -23,11 +23,11 @@ Biblioteca_ORM/
         └── smoke.php                    # Teste de fumaça (Smoke Test) para validar o fluxo geral
 
 
-🛠️ Tecnologias e Conceitos Aplicados
+***Tecnologias e Conceitos Aplicados***
 
 Linguagem: PHP 8+
 
-Banco de Dados: MySQL / MariaDB (via extensão PDO)
+Banco de Dados: MySQL 
 
 Pilares da POO:
 
@@ -39,7 +39,7 @@ Abstração & Polimorfismo: Implementação de contratos rígidos via Repository
 
 Padrões de Projeto: Repository Pattern e Singleton/Factory (na conexão).
 
-⚙️ Pré-requisitos
+***Pré-requisitos***
 
 Para executar este projeto localmente, você precisará de:
 
@@ -47,7 +47,7 @@ PHP (versão 8.0 ou superior) instalado e configurado no PATH do sistema, com a 
 
 Servidor de Banco de Dados (MySQL ou MariaDB) ativo (ex: XAMPP, Laragon, Docker ou serviço nativo).
 
-🚀 Como Configurar e Executar
+***Como Configurar e Executar***
 
 1. Configuração do Banco de Dados
 
@@ -70,6 +70,6 @@ Abra o terminal na raiz do projeto e execute:
 php src/tests/smoke.php
 
 
-👨‍💻 Autor
+***Autor***
 
 Lucas Castanheiro – Ciência da Computação (UNOESC)
