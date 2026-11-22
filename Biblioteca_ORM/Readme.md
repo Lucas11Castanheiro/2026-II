@@ -5,7 +5,7 @@ Sistema desenvolvido em PHP orientado a objetos que implementa o padrão de proj
 ***Arquitetura do Projeto***
 
 O projeto está organizado seguindo boas práticas de engenharia de software (Domain-Driven Design simplificado):
-
+```
 Biblioteca_ORM/
 ├── sql/
 │   └── schema.sql                       # Script DDL para criação das tabelas no banco
@@ -22,6 +22,7 @@ Biblioteca_ORM/
     └── tests/                           # Camada de Testes
         └── smoke.php                    # Teste de fumaça (Smoke Test) para validar o fluxo geral
 
+```
 
 ***Tecnologias e Conceitos Aplicados***
 
