@@ -6,7 +6,6 @@ Trabalho prático da disciplina de **Programação II** — Ciência da Computa�
 
 Implementação didática de um mini-ORM (Data Mapper simplificado) utilizando PHP 8.2+ puro e MySQL 8 (InnoDB), sem uso de frameworks ou ORMs de terceiros.
 
-<<<<<<< HEAD
 ## Estrutura do Projeto
 - `.env.example`: Modelo para configuração de variáveis de ambiente sem expor senhas reais (R10).
 - `sql/schema.sql`: Script DDL para criação do banco e tabelas (`livros`, `autores`, `livros_autores`, `exemplares`) (R1).
@@ -58,7 +57,6 @@ Biblioteca_ORM/
         └── smoke.php                    # Teste de fumaça (Smoke Test) para validar o fluxo geral
 
 ```
->>>>>>> 0b203111f3904880a7a00240e0ed99778d1de78e
 
 ## Limitações Didáticas
 Conforme o escopo da disciplina, a implementação não utiliza reflection, lazy loading, identity map nem controle de concorrência. Os relacionamentos N:N são carregados e manipulados explicitamente.
