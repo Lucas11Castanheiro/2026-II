@@ -1,0 +1,10 @@
+# Arquivos de ambiente e segredos locais
+.env
+
+# Diretórios de IDE
+.idea/
+.vscode/
+
+# Arquivos de log e temporários
+*.log
+*.tmp

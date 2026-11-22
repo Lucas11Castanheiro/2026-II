@@ -1,8 +1,11 @@
 <?php
 namespace Biblioteca\Infrastructure;
 
-interface RepositoryInterface {
-    
+/**
+ * Interface - Contrato e polimorfismo
+ */
+interface RepositoryInterface
+{
     public function buscar(int $id): ?object;
     public function listar(): array;
     public function salvar(object $entidade): void;

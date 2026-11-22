@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Técnico — BibliotecaORM</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 16mm 18mm 16mm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222;
+            line-height: 1.4;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            border-bottom: 2px solid #003366;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+        .header h1 {
+            font-size: 15pt;
+            color: #003366;
+            margin: 0 0 4px 0;
+        }
+        .meta {
+            font-size: 8.5pt;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+        h2 {
+            font-size: 11pt;
+            color: #003366;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 2px;
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+        p {
+            margin: 0 0 6px 0;
+            text-align: justify;
+        }
+        ul, ol {
+            margin: 0 0 8px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 3px;
+        }
+        code {
+            font-family: Consolas, monospace;
+            background-color: #f4f4f4;
+            padding: 1px 3px;
+            font-size: 9pt;
+        }
+        pre {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 6px;
+            font-family: Consolas, monospace;
+            font-size: 7.5pt;
+            line-height: 1.2;
+            margin: 6px 0;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Relatório Técnico — BibliotecaORM</h1>
+        <div class="meta">
+            <span><strong>UNOESC</strong> | Ciência da Computação | Programação II</span>
+            <span><strong>Prof.:</strong> Leandro Otavio Cordova Vieira</span>
+            <span><strong>Aluno:</strong> Lucas Castanheiro</span>
+        </div>
+    </div>
+
+    <h2>1. Objetivo do Trabalho</h2>
+    <p>
+        Desenvolver um mini-ORM próprio (mapeador objeto-relacional) denominado <strong>BibliotecaORM</strong>, em PHP puro e MySQL com PDO, sem utilizar bibliotecas ou ORMs de terceiros. A proposta integra os conceitos de encapsulamento, herança, polimorfismo, interfaces e persistência relacional com controle transacional.
+    </p>
+
+    <h2>2. Decisões Arquiteturais</h2>
+    <ul>
+        <li><strong>Data Mapper Simplificado:</strong> Separação entre Domínio (<code>src/Domain</code>) e Infraestrutura (<code>src/Infrastructure</code>). As entidades <code>Livro</code> e <code>Autor</code> contêm regras de negócio e validações, sem comandos SQL nem conexão com banco de dados.</li>
+        <li><strong>Classe Abstrata (<code>AbstractRepository</code>):</strong> Reutilização de código para operações CRUD básicas (<code>buscar</code>, <code>listar</code>, <code>salvar</code> e <code>excluir</code>). O método <code>salvar()</code> identifica se o objeto já possui ID para decidir entre <code>INSERT</code> e <code>UPDATE</code>.</li>
+        <li><strong>Contrato Polimórfico (<code>RepositoryInterface</code>):</strong> Permite que serviços operem sobre qualquer repositório (Livro ou Autor) pelo mesmo contrato genérico, sem verificar o tipo concreto.</li>
+        <li><strong>Relacionamento N:N:</strong> Associação persistida na tabela intermediária <code>livros_autores</code> e representada no domínio por uma coleção de autores no livro, garantindo que não haja duplicatas.</li>
+        <li><strong>Segurança e Transações:</strong> Utilização de prepared statements em todas as consultas e suporte a transações PDO com rollback para garantir atomicidade.</li>
+    </ul>
+
+    <h2>3. Diagrama de Classes</h2>
+    <pre>
+          +----------------------------------+
+          | &lt;&lt;interface&gt;&gt;                    |
+          | RepositoryInterface              |
+          +----------------------------------+
+          | + buscar(id: int): ?object       |
+          | + listar(): array                |
+          | + salvar(entidade: object): void |
+          | + excluir(id: int): void         |
+          +----------------------------------+
+                           ^
+                           | implements
+          +----------------------------------+
+          | &lt;&lt;abstract&gt;&gt;                     |
+          | AbstractRepository               |
+          +----------------------------------+
+          | # pdo: PDO                       |
+          +----------------------------------+
+          | + buscar(id: int): ?object       |
+          | + listar(): array                |
+          | + salvar(entidade: object): void |
+          | + excluir(id: int): void         |
+          | # {abstract} tabela(): string    |
+          | # {abstract} colunas(): array    |
+          | # {abstract} hidratar(): object  |
+          | # {abstract} extrair(): array    |
+          +----------------------------------+
+                ^                       ^
+                |                       |
++-------------------------------+ +-------------------------------+
+| LivroRepository               | | AutorRepository               |
++-------------------------------+ +-------------------------------+
+| + autoresDoLivro(id): array   | +-------------------------------+
+| + associarAutor(l, a): void   |
++-------------------------------+
+
+          +-----------------------+           +-----------------------+
+          | Livro                 | 1       * | Autor                 |
+          +-----------------------+-----------+-----------------------+
+          | - id: ?int            |           | - id: ?int            |
+          | - titulo: string      |           | - nome: string        |
+          | - isbn: ?string       |           | - nacionalidade: ?str |
+          | - anoPublicacao: ?int |           +-----------------------+
+          | - autores: Autor[]    |           | + id(): ?int          |
+          +-----------------------+           | + atribuirId(id): void|
+          | + id(): ?int          |           | + nome(): string      |
+          | + atribuirId(id): void|           | + nacionalidade(): str|
+          | + alterarTitulo(t): vd|           +-----------------------+
+          | + adicionarAutor(a):vd|
+          | + autores(): array    |
+          +-----------------------+
+    </pre>
+
+    <div class="page-break"></div>
+
+    <h2>4. Evidências de Execução</h2>
+    <p>O script de teste (<code>tests/smoke.php</code>) comprova o funcionamento das 7 evidências requeridas:</p>
+    <ol>
+        <li><strong>Cadastro de Livro e Autor:</strong> Objetos criados sem ID e salvos no banco. O MySQL gera as chaves primárias via <code>AUTO_INCREMENT</code> e elas são atribuídas aos objetos.</li>
+        <li><strong>Busca por ID e Reconstrução:</strong> A chamada <code>buscar($id)</code> hidrata o registro do banco em uma nova instância da classe <code>Livro</code> preservando os tipos originais.</li>
+        <li><strong>Atualização e Nova Consulta:</strong> Modificação do título da entidade e persistência via <code>salvar()</code>, comprovada por nova consulta direta ao banco.</li>
+        <li><strong>Associação de Dois Autores a um Livro:</strong> Vinculação de dois autores através da tabela <code>livros_autores</code> e reconstrução da coleção no objeto <code>Livro</code> sem duplicatas.</li>
+        <li><strong>Demonstração Polimórfica:</strong> Função consumidora <code>buscarPolimorfico(RepositoryInterface $repo, int $id)</code> opera tanto com <code>LivroRepository</code> quanto com <code>AutorRepository</code> pelo contrato comum.</li>
+        <li><strong>Transação com Erro Intencional e Rollback:</strong> Cadastro em transação com associação forçada a autor inexistente (ID 999999). O banco dispara erro de chave estrangeira, a transação sofre rollback e comprova-se que o livro não permaneceu no banco.</li>
+        <li><strong>Exclusão Controlada e Chave Estrangeira:</strong> Tentativa de exclusão direta de livro vinculado é bloqueada pelo MySQL (erro de FK). A exclusão controlada remove primeiro os vínculos da tabela associativa e depois o livro com sucesso.</li>
+    </ol>
+
+    <h2>5. Limitações Conhecidas</h2>
+    <ul>
+        <li>O mini-ORM não implementa carregamento automático (lazy loading), exigindo carregamento explícito da relação N:N.</li>
+        <li>Não há controle de concorrência nem bloqueio otimista via coluna de versão.</li>
+        <li>A exclusão em cascata não está configurada no banco, preservando a integridade referencial manual.</li>
+    </ul>
+
+</body>
+</html>

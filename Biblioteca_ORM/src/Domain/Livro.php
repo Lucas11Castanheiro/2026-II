@@ -1,77 +1,76 @@
 <?php
 namespace Biblioteca\Domain;
 
+require_once __DIR__ . '/Autor.php';
+
+/**
+ * Entidade Livro - Encapsulamento e associação N:N
+ */
 final class Livro
 {
-	private ?int $id = null;
-	private string $titulo;
-	private ?string $isbn;
-	private ?int $anoPublicacao;
+    private ?int $id = null;
+    private string $titulo;
+    private ?string $isbn;
+    private ?int $anoPublicacao;
 
-	/** @var Autor[] */
-	private array $autores = [];
+    /** @var Autor[] */
+    private array $autores = [];
 
-	public function __construct(string $titulo, ?string $isbn = null, ?int $ano = null)
-	{
-		$this->alterarTitulo($titulo);
-		$this->isbn = $isbn;
-		$this->anoPublicacao = $ano;
-	}
+    public function __construct(string $titulo, ?string $isbn = null, ?int $ano = null)
+    {
+        $this->alterarTitulo($titulo);
+        $this->isbn = $isbn;
+        $this->anoPublicacao = $ano;
+    }
 
-	public function id(): ?int
-	{
-		return $this->id;
-	}
+    public function id(): ?int
+    {
+        return $this->id;
+    }
 
-	public function atribuirId(int $id): void
-	{
-		if ($id <= 0 || ($this->id !== null && $this->id !== $id)) {
-			throw new \LogicException('Identidade inválida');
-		}
+    public function atribuirId(int $id): void
+    {
+        if ($id <= 0 || ($this->id !== null && $this->id !== $id)) {
+            throw new \LogicException('Identidade inválida');
+        }
+        $this->id = $id;
+    }
 
-		$this->id = $id;
-	}
+    public function titulo(): string
+    {
+        return $this->titulo;
+    }
 
-	public function titulo(): string
-	{
-		return $this->titulo;
-	}
+    public function isbn(): ?string
+    {
+        return $this->isbn;
+    }
 
-	public function isbn(): ?string
-	{
-		return $this->isbn;
-	}
+    public function anoPublicacao(): ?int
+    {
+        return $this->anoPublicacao;
+    }
 
-	public function anoPublicacao(): ?int
-	{
-		return $this->anoPublicacao;
-	}
+    public function alterarTitulo(string $titulo): void
+    {
+        if (trim($titulo) === '') {
+            throw new \InvalidArgumentException('Título obrigatório');
+        }
+        $this->titulo = trim($titulo);
+    }
 
-	public function alterarTitulo(string $titulo): void
-	{
-		if (trim($titulo) === '') {
-			throw new \InvalidArgumentException('Título obrigatório');
-		}
+    public function adicionarAutor(Autor $autor): void
+    {
+        foreach ($this->autores as $existente) {
+            if ($existente === $autor || ($autor->id() !== null && $existente->id() === $autor->id())) {
+                return;
+            }
+        }
+        $this->autores[] = $autor;
+    }
 
-		$this->titulo = trim($titulo);
-	}
-
-	public function adicionarAutor(Autor $autor): void
-	{
-		foreach ($this->autores as $existente) {
-			if (
-				$existente === $autor
-				|| ($autor->id() !== null && $existente->id() === $autor->id())
-			) {
-				return;
-			}
-		}
-
-		$this->autores[] = $autor;
-	}
-
-	public function autores(): array
-	{
-		return $this->autores;
-	}
+    public function autores(): array
+    {
+        return $this->autores;
+    }
 }

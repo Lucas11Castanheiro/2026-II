@@ -1,82 +1,85 @@
 <?php
 namespace Biblioteca\Infrastructure;
 
+require_once __DIR__ . '/AbstractRepository.php';
+require_once dirname(__DIR__) . '/Domain/Livro.php';
+require_once dirname(__DIR__) . '/Domain/Autor.php';
+
 use Biblioteca\Domain\Livro;
+
+/**
+ * Repositório de Livro - Especialização e relacionamento N:N
+ */
 final class LivroRepository extends AbstractRepository
 {
-	protected function tabela(): string
-	{
-		return 'livros';
-	}
+    protected function tabela(): string
+    {
+        return 'livros';
+    }
 
-	protected function colunas(): array
-	{
-		return ['titulo', 'isbn', 'ano_publicacao'];
-	}
+    protected function colunas(): array
+    {
+        return ['titulo', 'isbn', 'ano_publicacao'];
+    }
 
-	protected function hidratar(array $linha): Livro
-	{
-		$livro = new Livro(
-			$linha['titulo'],
-			$linha['isbn'],
-			$linha['ano_publicacao'] === null ? null : (int) $linha['ano_publicacao']
-		);
-		$livro->atribuirId((int) $linha['id']);
+    protected function hidratar(array $linha): Livro
+    {
+        $livro = new Livro(
+            $linha['titulo'],
+            $linha['isbn'],
+            $linha['ano_publicacao'] === null ? null : (int) $linha['ano_publicacao']
+        );
+        $livro->atribuirId((int) $linha['id']);
+        return $livro;
+    }
 
-		return $livro;
-	}
+    protected function extrair(object $entidade): array
+    {
+        if (!$entidade instanceof Livro) {
+            throw new \InvalidArgumentException('Esperado Livro');
+        }
+        return [
+            'titulo' => $entidade->titulo(),
+            'isbn' => $entidade->isbn(),
+            'ano_publicacao' => $entidade->anoPublicacao(),
+        ];
+    }
 
-	protected function extrair(object $entidade): array
-	{
-		if (!$entidade instanceof Livro) {
-			throw new \InvalidArgumentException('Esperado Livro');
-		}
+    protected function identidade(object $entidade): ?int
+    {
+        if (!$entidade instanceof Livro) {
+            throw new \InvalidArgumentException('Esperado Livro');
+        }
+        return $entidade->id();
+    }
 
-		return [
-			'titulo' => $entidade->titulo(),
-			'isbn' => $entidade->isbn(),
-			'ano_publicacao' => $entidade->anoPublicacao(),
-		];
-	}
+    protected function definirIdentidade(object $entidade, int $id): void
+    {
+        if (!$entidade instanceof Livro) {
+            throw new \InvalidArgumentException('Esperado Livro');
+        }
+        $entidade->atribuirId($id);
+    }
 
-	protected function identidade(object $entidade): ?int
-	{
-		if (!$entidade instanceof Livro) {
-			throw new \InvalidArgumentException('Esperado Livro');
-		}
+    public function autoresDoLivro(int $livroId): array
+    {
+        $sql = 'SELECT a.* FROM autores a INNER JOIN livros_autores la
+                ON la.autor_id = a.id WHERE la.livro_id = :id ORDER BY a.nome';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $livroId]);
 
-		return $entidade->id();
-	}
+        return array_map(function (array $r) {
+            $autor = new \Biblioteca\Domain\Autor($r['nome'], $r['nacionalidade']);
+            $autor->atribuirId((int) $r['id']);
+            return $autor;
+        }, $stmt->fetchAll(\PDO::FETCH_ASSOC));
+    }
 
-	protected function definirIdentidade(object $entidade, int $id): void
-	{
-		if (!$entidade instanceof Livro) {
-			throw new \InvalidArgumentException('Esperado Livro');
-		}
-
-		$entidade->atribuirId($id);
-	}
-
-	public function autoresDoLivro(int $livroId): array
-	{
-		$sql = 'SELECT a.* FROM autores a INNER JOIN livros_autores la
-			ON la.autor_id = a.id WHERE la.livro_id = :id ORDER BY a.nome';
-		$stmt = $this->pdo->prepare($sql);
-		$stmt->execute(['id' => $livroId]);
-
-		return array_map(function (array $r) {
-			$autor = new \Biblioteca\Domain\Autor($r['nome'], $r['nacionalidade']);
-			$autor->atribuirId((int) $r['id']);
-
-			return $autor;
-		}, $stmt->fetchAll(\PDO::FETCH_ASSOC));
-	}
-
-	public function associarAutor(int $livroId, int $autorId): void
-	{
-		$stmt = $this->pdo->prepare(
-			'INSERT INTO livros_autores (livro_id, autor_id) VALUES (:livro, :autor)'
-		);
-		$stmt->execute(['livro' => $livroId, 'autor' => $autorId]);
-	}
+    public function associarAutor(int $livroId, int $autorId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO livros_autores (livro_id, autor_id) VALUES (:livro, :autor)'
+        );
+        $stmt->execute(['livro' => $livroId, 'autor' => $autorId]);
+    }
 }
