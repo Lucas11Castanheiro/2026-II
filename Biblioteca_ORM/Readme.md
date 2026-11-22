@@ -6,6 +6,7 @@ Trabalho prático da disciplina de **Programação II** — Ciência da Computa�
 
 Implementação didática de um mini-ORM (Data Mapper simplificado) utilizando PHP 8.2+ puro e MySQL 8 (InnoDB), sem uso de frameworks ou ORMs de terceiros.
 
+<<<<<<< HEAD
 ## Estrutura do Projeto
 - `.env.example`: Modelo para configuração de variáveis de ambiente sem expor senhas reais (R10).
 - `sql/schema.sql`: Script DDL para criação do banco e tabelas (`livros`, `autores`, `livros_autores`, `exemplares`) (R1).
@@ -37,6 +38,27 @@ Implementação didática de um mini-ORM (Data Mapper simplificado) utilizando P
    ```bash
    php -d zend.assertions=1 -d assert.exception=1 tests/smoke.php
    ```
+=======
+O projeto está organizado seguindo boas práticas de engenharia de software (Domain-Driven Design simplificado):
+```
+Biblioteca_ORM/
+├── sql/
+│   └── schema.sql                       # Script DDL para criação das tabelas no banco
+└── src/
+    ├── Domain/                          # Camada de Domínio (Entidades e Regras de Negócio)
+    │   ├── Autor.php                    # Modelo representando a entidade Autor
+    │   └── Livro.php                    # Modelo representando a entidade Livro
+    ├── Infrastructure/                  # Camada de Infraestrutura (Banco de Dados e Persistência)
+    │   ├── Conexao.php                  # Gerenciador de conexão PDO com o banco de dados
+    │   ├── RepositoryInterface.php      # Contrato padrão para os repositórios
+    │   ├── AbstractRepository.php       # Classe base com operações CRUD reutilizáveis
+    │   ├── AutorRepository.php          # Repositório específico para persistência de Autores
+    │   └── LivroRepository.php          # Repositório específico para persistência de Livros
+    └── tests/                           # Camada de Testes
+        └── smoke.php                    # Teste de fumaça (Smoke Test) para validar o fluxo geral
+
+```
+>>>>>>> 0b203111f3904880a7a00240e0ed99778d1de78e
 
 ## Limitações Didáticas
 Conforme o escopo da disciplina, a implementação não utiliza reflection, lazy loading, identity map nem controle de concorrência. Os relacionamentos N:N são carregados e manipulados explicitamente.
